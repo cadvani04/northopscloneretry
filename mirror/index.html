@@ -19,7 +19,7 @@
      - Meta tags + JSON-LD: Page Settings → Inside <head> tag
      - <style> block: paste with this embed (Webflow inlines it),
        OR move to Page Settings → Inside <head> tag for cleanliness
-     - Hero video: local file /videos/0515.mov + inline play script (below)
+     - Hero video: local /videos/0515.mov (Drive links do not work in <video>); muted autoplay loop
      - The hardcoded <h1> in the markup is critical for SEO/FOUC
      ============================================================ -->
 
@@ -330,9 +330,8 @@
      SCRIPTS
      ============================================================ -->
 
-<!-- Local hero video (public/videos/0515.mov) -->
 <script>
-  (function heroLocalVideo() {
+  (function heroBackgroundVideo() {
     var container = document.getElementById('khVideoBg');
     var video = document.getElementById('khHeroVideo');
     if (!container || !video) return;
@@ -351,6 +350,18 @@
       container.classList.add('is-playing');
     }
 
+    function hideBrokenVideoLayer() {
+      container.style.display = 'none';
+    }
+
+    video.addEventListener(
+      'error',
+      function () {
+        hideBrokenVideoLayer();
+      },
+      { once: true },
+    );
+
     function tryPlay() {
       video.muted = true;
       var p = video.play();
@@ -359,11 +370,17 @@
       }
     }
 
+    video.addEventListener('loadeddata', reveal);
+    video.addEventListener('canplay', reveal);
     video.addEventListener('playing', reveal);
     video.addEventListener('play', reveal);
     video.addEventListener('timeupdate', function () {
       if (video.currentTime > 0.05) reveal();
     });
+
+    window.setTimeout(function () {
+      reveal();
+    }, 4500);
 
     function retryOnInteraction() {
       tryPlay();
