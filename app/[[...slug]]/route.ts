@@ -3,14 +3,9 @@ import path from "path";
 
 const MIRROR_ROOT = path.join(process.cwd(), "mirror");
 
-/** Shared Google Drive file (must be "Anyone with the link" can view). Used on Vercel when no CDN URL. */
-const GOOGLE_DRIVE_HERO_FILE_ID = "17Skp3l5DgmFyd_rx-9mnYjI5kKpIOB77";
-const GOOGLE_DRIVE_HERO_SRC = `https://drive.google.com/uc?export=download&id=${GOOGLE_DRIVE_HERO_FILE_ID}`;
-
 /**
- * Hero video: local public/videos/0515.mov is too large for Vercel Hobby static limits.
- * - Local dev: unchanged mirror path /videos/0515.mov
- * - Vercel (VERCEL=1): replace with Google Drive direct link unless NORTHOPS_HERO_VIDEO_URL is set (CDN wins)
+ * Optional CDN override for the home hero <video src>.
+ * If unset, HTML keeps /videos/0515.mov (public/ + Git LFS on Vercel — see vercel.json).
  */
 function escapeHtmlAttrValue(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -18,15 +13,11 @@ function escapeHtmlAttrValue(value: string): string {
 
 function injectHomeHeroVideoSrc(html: string, isHome: boolean): string {
   if (!isHome) return html;
-
   const cdnUrl = process.env.NORTHOPS_HERO_VIDEO_URL?.trim();
-  const onVercel = Boolean(process.env.VERCEL);
-  const url = cdnUrl || (onVercel ? GOOGLE_DRIVE_HERO_SRC : "");
-
-  if (!url) return html;
+  if (!cdnUrl) return html;
   return html.replace(
     /src="\/videos\/0515\.mov"/,
-    `src="${escapeHtmlAttrValue(url)}"`,
+    `src="${escapeHtmlAttrValue(cdnUrl)}"`,
   );
 }
 
