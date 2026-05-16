@@ -5,6 +5,3 @@ out
 *.log
 .DS_Store
 .env*.local
-
-# Local hero video; GitHub blocks files over ~100MB without Git LFS
-public/videos/*.mov
