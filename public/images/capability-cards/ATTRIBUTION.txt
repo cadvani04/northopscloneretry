@@ -1,0 +1,12 @@
+Capability grid backgrounds — royalty-free stock via Pexels (see https://www.pexels.com/license/).
+
+Map:
+- inventory.jpg      → Photo ID 4484078  (warehouse / materials handling)
+- production.jpg     → Photo ID 1108572 (industrial / machinery context)
+- scheduling.jpg     → Photo ID 3184418 (team collaboration / planning)
+- purchasing.jpg     → Photo ID 6169664 (logistics / freight context)
+- dashboards.jpg     → Photo ID 265087  (analytics / laptop charts)
+- custom-systems.jpg → Photo ID 574071 (development / workstation)
+
+Suggested credit line:
+Photos courtesy of Pexels contributors.
