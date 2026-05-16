@@ -3,6 +3,24 @@ import path from "path";
 
 const MIRROR_ROOT = path.join(process.cwd(), "mirror");
 
+/**
+ * Vercel Hobby limits static files to ~100MB; the repo hero is often larger (Git LFS).
+ * Set NORTHOPS_HERO_VIDEO_URL to a public HTTPS URL (e.g. CDN MP4 H.264) for production.
+ */
+function escapeHtmlAttrValue(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+}
+
+function injectHomeHeroVideoSrc(html: string, isHome: boolean): string {
+  if (!isHome) return html;
+  const url = process.env.NORTHOPS_HERO_VIDEO_URL?.trim();
+  if (!url) return html;
+  return html.replace(
+    /src="\/videos\/0515\.mov"/,
+    `src="${escapeHtmlAttrValue(url)}"`,
+  );
+}
+
 /** Rewritten mirrored CSS no longer matches Webflow's SRI hash; browsers block the whole sheet. */
 function stripSubresourceIntegrity(html: string): string {
   return html.replace(/\s+integrity=["'][^"']+["']/gi, "");
@@ -41,6 +59,8 @@ export async function GET(
   context: { params: Promise<{ slug?: string[] }> },
 ) {
   const { slug } = await context.params;
+  const segments = slug?.filter(Boolean) ?? [];
+  const isHome = segments.length === 0;
   const filePath = resolveMirrorHtml(slug);
 
   if (!filePath) {
@@ -49,7 +69,8 @@ export async function GET(
 
   try {
     const raw = await readFile(filePath, "utf8");
-    const html = patchWebflowHostHtml(raw);
+    let html = patchWebflowHostHtml(raw);
+    html = injectHomeHeroVideoSrc(html, isHome);
     return new Response(html, {
       status: 200,
       headers: {
