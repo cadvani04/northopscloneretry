@@ -3,9 +3,15 @@ import path from "path";
 
 const MIRROR_ROOT = path.join(process.cwd(), "mirror");
 
+/** Same file as repo LFS object; streams from GitHub on Vercel (no local 474MB bundle). */
+const GITHUB_HERO_VIDEO_SRC =
+  "https://media.githubusercontent.com/media/cadvani04/northopscloneretry/main/public/videos/0515.mov";
+
 /**
- * Optional CDN override for the home hero <video src>.
- * If unset, HTML keeps /videos/0515.mov (public/ + Git LFS on Vercel — see vercel.json).
+ * Hero video:
+ * - Local: /videos/0515.mov (public/)
+ * - Vercel: GitHub media URL (git lfs pull fails on Vercel builders)
+ * - Optional NORTHOPS_HERO_VIDEO_URL overrides both
  */
 function escapeHtmlAttrValue(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
@@ -13,11 +19,15 @@ function escapeHtmlAttrValue(value: string): string {
 
 function injectHomeHeroVideoSrc(html: string, isHome: boolean): string {
   if (!isHome) return html;
-  const cdnUrl = process.env.NORTHOPS_HERO_VIDEO_URL?.trim();
-  if (!cdnUrl) return html;
+
+  const override = process.env.NORTHOPS_HERO_VIDEO_URL?.trim();
+  const onVercel = Boolean(process.env.VERCEL);
+  const url = override || (onVercel ? GITHUB_HERO_VIDEO_SRC : "");
+
+  if (!url) return html;
   return html.replace(
     /src="\/videos\/0515\.mov"/,
-    `src="${escapeHtmlAttrValue(cdnUrl)}"`,
+    `src="${escapeHtmlAttrValue(url)}"`,
   );
 }
 
